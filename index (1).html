@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณไฟฟ้า 2564</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #00ff9d;
+    --text: #e2e8f0;
+    --text-muted: #64748b;
+    --error: #ff4757;
+    --success: #00ff9d;
+    --warning: #ffa502;
+    --grid: rgba(0, 212, 255, 0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Sarabun', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Glow orbs */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0,212,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* Header */
+  header {
+    padding: 30px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--accent), #0077aa);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  .logo-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text p {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .badge {
+    background: rgba(0,212,255,0.1);
+    border: 1px solid rgba(0,212,255,0.3);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 6px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .tab-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 12px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05));
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,0.3);
+    box-shadow: 0 0 15px rgba(0,212,255,0.1);
+  }
+
+  .tab-btn:hover:not(.active) {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  /* Panels */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .card-title .icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .icon-blue { background: rgba(0,212,255,0.15); }
+  .icon-orange { background: rgba(255,107,53,0.15); }
+  .icon-green { background: rgba(0,255,157,0.15); }
+  .icon-yellow { background: rgba(255,165,2,0.15); }
+
+  /* Form */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+  label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,0.1);
+  }
+
+  select option { background: var(--surface2); }
+
+  .unit-hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Buttons */
+  .btn-calc {
+    background: linear-gradient(135deg, var(--accent), #007acc);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    color: #000;
+    font-family: 'Sarabun', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 20px rgba(0,212,255,0.25);
+  }
+
+  .btn-calc:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,212,255,0.4);
+  }
+
+  .btn-reset {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 24px;
+    color: var(--text-muted);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-reset:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* Results */
+  .result-box {
+    background: linear-gradient(135deg, rgba(0,212,255,0.05), rgba(0,119,204,0.05));
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 20px;
+  }
+
+  .result-box.warning-box {
+    background: linear-gradient(135deg, rgba(255,165,2,0.05), rgba(255,165,2,0.02));
+    border-color: rgba(255,165,2,0.3);
+  }
+
+  .result-box.error-box {
+    background: linear-gradient(135deg, rgba(255,71,87,0.05), rgba(255,71,87,0.02));
+    border-color: rgba(255,71,87,0.3);
+  }
+
+  .result-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .result-item {
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+  }
+
+  .result-item .r-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .result-item .r-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent);
+  }
+
+  .result-item .r-unit {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .result-item.highlight .r-value { color: var(--accent3); }
+  .result-item.warn .r-value { color: var(--warning); }
+  .result-item.danger .r-value { color: var(--error); }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 16px;
+  }
+
+  .status-ok { background: rgba(0,255,157,0.1); color: var(--success); border: 1px solid rgba(0,255,157,0.3); }
+  .status-warn { background: rgba(255,165,2,0.1); color: var(--warning); border: 1px solid rgba(255,165,2,0.3); }
+  .status-fail { background: rgba(255,71,87,0.1); color: var(--error); border: 1px solid rgba(255,71,87,0.3); }
+
+  .note-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Table */
+  .ref-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 12px;
+  }
+
+  .ref-table th {
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .ref-table td {
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  .ref-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+  .ref-table tr.highlight-row td { background: rgba(0,212,255,0.08); color: var(--accent); }
+
+  /* Divider */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 24px 0;
+  }
+
+  /* Tooltip / Info */
+  .info-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* Formula display */
+  .formula-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    line-height: 1.7;
+  }
+
+  .formula-box span { color: var(--text-muted); font-family: 'Sarabun', sans-serif; }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    .tabs { gap: 2px; padding: 4px; }
+    .tab-btn { min-width: 100px; font-size: 0.8rem; padding: 10px 10px; }
+    .card { padding: 18px; }
+  }
+
+  .hidden { display: none; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+
+  /* Scroll behavior */
+  html { scroll-behavior: smooth; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--surface); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-area">
+      <div class="logo-icon">⚡</div>
+      <div class="logo-text">
+        <h1>คำนวณไฟฟ้า 2564</h1>
+        <p>Electrical Calculation Tool · Standard 2021</p>
+      </div>
+    </div>
+    <span class="badge">STANDARD 2022-2564</span>
+  </header>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('wire')">🔌 ขนาดสายไฟ</button>
+    <button class="tab-btn" onclick="switchTab('breaker')">🔒 Circuit Breaker</button>
+    <button class="tab-btn" onclick="switchTab('vdrop')">📉 Voltage Drop</button>
+    <button class="tab-btn" onclick="switchTab('load')">📊 Load Calculation</button>
+  </div>
+
+  <!-- ===== TAB 1: Wire Sizing ===== -->
+  <div id="panel-wire" class="panel active">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon icon-blue">🔌</div>
+        การเลือกขนาดสายไฟ (Wire Sizing) — มาตรฐาน 2022-2564 ตาราง 4
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>กระแสโหลด (Load Current)</label>
+          <input type="number" id="w-current" placeholder="เช่น 20" min="0" step="0.1">
+          <span class="unit-hint">หน่วย: แอมแปร์ (A)</span>
+        </div>
+        <div class="form-group">
+          <label>ชนิดฉนวน (Insulation Type)</label>
+          <select id="w-insulation">
+            <option value="PVC">PVC (60°C) — THW, NYY</option>
+            <option value="XLPE">XLPE (90°C) — THHN, CV</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>วิธีการเดินสาย</label>
+          <select id="w-install">
+            <option value="conduit">ร้อยในท่อ (In Conduit)</option>
+            <option value="tray">บนรางเคเบิล (Cable Tray)</option>
+            <option value="air">เดินในอากาศ (Open Air)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>จำนวนสายในท่อ / กลุ่ม</label>
+          <select id="w-bundle">
+            <option value="1">1–3 เส้น (ค่าปรับ = 1.00)</option>
+            <option value="0.80">4–6 เส้น (ค่าปรับ = 0.80)</option>
+            <option value="0.70">7–9 เส้น (ค่าปรับ = 0.70)</option>
+            <option value="0.65">10–15 เส้น (ค่าปรับ = 0.65)</option>
+            <option value="0.50">มากกว่า 15 เส้น (ค่าปรับ = 0.50)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>อุณหภูมิแวดล้อม (Ambient Temp)</label>
+          <select id="w-temp">
+            <option value="1.00">30°C (ค่าปรับ = 1.00)</option>
+            <option value="0.91">35°C (ค่าปรับ = 0.91)</option>
+            <option value="0.82">40°C (ค่าปรับ = 0.82)</option>
+            <option value="0.71">45°C (ค่าปรับ = 0.71)</option>
+            <option value="0.58">50°C (ค่าปรับ = 0.58)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ประเภทวงจร</label>
+          <select id="w-circuit">
+            <option value="1.0">วงจรทั่วไป (×1.0)</option>
+            <option value="1.25">มอเตอร์ / ต่อเนื่อง (×1.25)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-calc" onclick="calcWire()">⚡ คำนวณ</button>
+        <button class="btn-reset" onclick="resetForm('wire')">↺ รีเซ็ต</button>
+      </div>
+    </div>
+
+    <div id="wire-result" class="hidden">
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">📋</div>ผลการคำนวณขนาดสายไฟ</div>
+        <div id="wire-result-content"></div>
+      </div>
+    </div>
+
+    <!-- Reference Table -->
+    <div class="card">
+      <div class="card-title"><div class="icon icon-blue">📖</div>ตารางพิกัดกระแส — มาตรฐาน 2022-2564</div>
+      <table class="ref-table" id="wire-ref-table">
+        <thead>
+          <tr>
+            <th>ขนาดสาย (mm²)</th>
+            <th>PVC 60°C ในท่อ (A)</th>
+            <th>XLPE 90°C ในท่อ (A)</th>
+            <th>PVC 60°C ราง (A)</th>
+            <th>XLPE 90°C ราง (A)</th>
+          </tr>
+        </thead>
+        <tbody id="wire-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: Circuit Breaker ===== -->
+  <div id="panel-breaker" class="panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon icon-orange">🔒</div>
+        การเลือกขนาด Circuit Breaker — มาตรฐาน 2022-2564
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>กระแสโหลด (Load Current)</label>
+          <input type="number" id="b-current" placeholder="เช่น 20" min="0" step="0.1">
+          <span class="unit-hint">หน่วย: แอมแปร์ (A)</span>
+        </div>
+        <div class="form-group">
+          <label>ประเภทโหลด</label>
+          <select id="b-loadtype">
+            <option value="general">โหลดทั่วไป (×1.0)</option>
+            <option value="motor">มอเตอร์ / Continuous (×1.25)</option>
+            <option value="heating">โหลดความร้อน (×1.25)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ระบบแรงดัน</label>
+          <select id="b-voltage">
+            <option value="220">220V (1 Phase)</option>
+            <option value="380">380V (3 Phase)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ขนาดสายไฟที่เลือก (mm²)</label>
+          <select id="b-wiresize">
+            <option value="">-- เลือกเพื่อตรวจสอบ --</option>
+            <option value="1.5">1.5 mm²</option>
+            <option value="2.5">2.5 mm²</option>
+            <option value="4">4 mm²</option>
+            <option value="6">6 mm²</option>
+            <option value="10">10 mm²</option>
+            <option value="16">16 mm²</option>
+            <option value="25">25 mm²</option>
+            <option value="35">35 mm²</option>
+            <option value="50">50 mm²</option>
+            <option value="70">70 mm²</option>
+            <option value="95">95 mm²</option>
+            <option value="120">120 mm²</option>
+            <option value="150">150 mm²</option>
+            <option value="185">185 mm²</option>
+            <option value="240">240 mm²</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ชนิดฉนวนสาย</label>
+          <select id="b-ins">
+            <option value="PVC">PVC 60°C</option>
+            <option value="XLPE">XLPE 90°C</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Breaking Capacity ที่ต้องการ</label>
+          <select id="b-ic">
+            <option value="6">6 kA (ระบบทั่วไป)</option>
+            <option value="10">10 kA</option>
+            <option value="16">16 kA</option>
+            <option value="25">25 kA</option>
+            <option value="36">36 kA</option>
+            <option value="50">50 kA</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-calc" onclick="calcBreaker()">⚡ คำนวณ</button>
+        <button class="btn-reset" onclick="resetForm('breaker')">↺ รีเซ็ต</button>
+      </div>
+    </div>
+
+    <div id="breaker-result" class="hidden">
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">📋</div>ผลการคำนวณ Circuit Breaker</div>
+        <div id="breaker-result-content"></div>
+      </div>
+    </div>
+
+    <!-- Standard CB sizes reference -->
+    <div class="card">
+      <div class="card-title"><div class="icon icon-orange">📖</div>ขนาดมาตรฐาน Circuit Breaker (IEC 60898)</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+        <span class="info-chip">6A</span><span class="info-chip">10A</span><span class="info-chip">16A</span>
+        <span class="info-chip">20A</span><span class="info-chip">25A</span><span class="info-chip">32A</span>
+        <span class="info-chip">40A</span><span class="info-chip">50A</span><span class="info-chip">63A</span>
+        <span class="info-chip">80A</span><span class="info-chip">100A</span><span class="info-chip">125A</span>
+        <span class="info-chip">160A</span><span class="info-chip">200A</span><span class="info-chip">250A</span>
+        <span class="info-chip">315A</span><span class="info-chip">400A</span><span class="info-chip">500A</span>
+        <span class="info-chip">630A</span><span class="info-chip">800A</span><span class="info-chip">1000A</span>
+        <span class="info-chip">1250A</span><span class="info-chip">1600A</span><span class="info-chip">2000A</span>
+      </div>
+      <p class="note-text">หมายเหตุ: ขนาด CB ต้องไม่น้อยกว่า กระแสโหลดที่ปรับแล้ว และต้องไม่เกินพิกัดกระแสของสาย (มาตรฐาน 2022-2564 ข้อ 3.03)</p>
+    </div>
+  </div>
+
+  <!-- ===== TAB 3: Voltage Drop ===== -->
+  <div id="panel-vdrop" class="panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon icon-yellow">📉</div>
+        การคำนวณ Voltage Drop — มาตรฐาน 2022-2564 (ไม่เกิน 3% แรงดันต้นทาง)
+      </div>
+
+      <div class="formula-box">
+        VD (%) = (√3 × I × L × (R·cosφ + X·sinφ)) / (V × 1000) × 100
+        <br><span>สำหรับ 3 เฟส | หน่วย: I=A, L=m, R/X=Ω/km, V=V</span>
+        <br><br>
+        VD (%) = (2 × I × L × (R·cosφ + X·sinφ)) / (V × 1000) × 100
+        <br><span>สำหรับ 1 เฟส</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>กระแสโหลด (A)</label>
+          <input type="number" id="v-current" placeholder="เช่น 50" min="0" step="0.1">
+        </div>
+        <div class="form-group">
+          <label>ระยะทาง (เมตร)</label>
+          <input type="number" id="v-length" placeholder="เช่น 100" min="0" step="1">
+        </div>
+        <div class="form-group">
+          <label>ขนาดสาย (mm²)</label>
+          <select id="v-size">
+            <option value="1.5">1.5 mm²</option>
+            <option value="2.5">2.5 mm²</option>
+            <option value="4">4 mm²</option>
+            <option value="6">6 mm²</option>
+            <option value="10">10 mm²</option>
+            <option value="16">16 mm²</option>
+            <option value="25">25 mm²</option>
+            <option value="35">35 mm²</option>
+            <option value="50">50 mm²</option>
+            <option value="70">70 mm²</option>
+            <option value="95">95 mm²</option>
+            <option value="120">120 mm²</option>
+            <option value="150">150 mm²</option>
+            <option value="185">185 mm²</option>
+            <option value="240">240 mm²</option>
+            <option value="300">300 mm²</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ระบบแรงดัน</label>
+          <select id="v-volt">
+            <option value="220">220V (1 เฟส)</option>
+            <option value="380">380V (3 เฟส)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Power Factor (cosφ)</label>
+          <select id="v-pf">
+            <option value="1.00">1.00 (Resistive)</option>
+            <option value="0.95">0.95</option>
+            <option value="0.90" selected>0.90 (ทั่วไป)</option>
+            <option value="0.85">0.85</option>
+            <option value="0.80">0.80 (มอเตอร์)</option>
+            <option value="0.75">0.75</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ชนิดสาย</label>
+          <select id="v-conductor">
+            <option value="Cu">ทองแดง (Copper)</option>
+            <option value="Al">อลูมิเนียม (Aluminum)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-calc" onclick="calcVDrop()">⚡ คำนวณ</button>
+        <button class="btn-reset" onclick="resetForm('vdrop')">↺ รีเซ็ต</button>
+      </div>
+    </div>
+
+    <div id="vdrop-result" class="hidden">
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">📋</div>ผลการคำนวณ Voltage Drop</div>
+        <div id="vdrop-result-content"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="icon icon-yellow">📖</div>เกณฑ์ Voltage Drop — มาตรฐาน 2022-2564</div>
+      <table class="ref-table">
+        <thead>
+          <tr><th>ประเภทวงจร</th><th>% VD สูงสุด</th><th>อ้างอิง</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>วงจรย่อย (Branch Circuit)</td><td>3%</td><td>ข้อ 2.06</td></tr>
+          <tr><td>วงจรป้อน (Feeder)</td><td>3%</td><td>ข้อ 2.06</td></tr>
+          <tr><td>รวมทั้งระบบ (Service+Feeder+Branch)</td><td>5%</td><td>ข้อ 2.06</td></tr>
+          <tr><td>แสงสว่าง (Lighting)</td><td>3%</td><td>ข้อ 2.06</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== TAB 4: Load Calculation ===== -->
+  <div id="panel-load" class="panel">
+    <div class="card">
+      <div class="card-title">
+        <div class="icon icon-yellow">📊</div>
+        Load Calculation / Demand Factor — มาตรฐาน 2022-2564
+      </div>
+
+      <div id="load-items">
+        <div class="load-item" id="item-0">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="font-weight:600;color:var(--accent);font-size:0.85rem;">โหลดที่ 1</span>
+            <button onclick="removeItem(0)" style="background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.2);border-radius:6px;padding:2px 8px;color:var(--error);font-size:0.78rem;cursor:pointer;">ลบ</button>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>ชื่อโหลด</label>
+              <input type="text" placeholder="เช่น แสงสว่างชั้น 1" class="load-name">
+            </div>
+            <div class="form-group">
+              <label>กำลังไฟ (W)</label>
+              <input type="number" placeholder="เช่น 1000" min="0" class="load-watts">
+            </div>
+            <div class="form-group">
+              <label>Demand Factor (%)</label>
+              <select class="load-df">
+                <option value="1.00">100% — มอเตอร์ขนาดใหญ่สุด</option>
+                <option value="1.25">125% — Continuous (มอเตอร์)</option>
+                <option value="0.50">50% — แสงสว่างพาณิชย์</option>
+                <option value="0.35">35% — โหลดที่ 10,001–20,000W</option>
+                <option value="0.25">25% — โหลดส่วนเกิน 20,000W</option>
+                <option value="0.80">80% — โหลดทั่วไป</option>
+                <option value="0.60">60% — โหลดสำรอง</option>
+                <option value="custom">กำหนดเอง</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>กำหนด DF เอง (%)</label>
+              <input type="number" placeholder="เช่น 75" min="0" max="125" class="load-df-custom" disabled>
+            </div>
+            <div class="form-group">
+              <label>Power Factor</label>
+              <input type="number" placeholder="0.90" min="0.1" max="1" step="0.01" value="0.90" class="load-pf">
+            </div>
+            <div class="form-group">
+              <label>จำนวน (pcs)</label>
+              <input type="number" placeholder="1" min="1" value="1" class="load-qty">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin: 20px 0; display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-reset" onclick="addLoadItem()" style="color:var(--accent);border-color:rgba(0,212,255,0.3);">+ เพิ่มโหลด</button>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>ระบบแรงดัน</label>
+          <select id="l-volt">
+            <option value="220">220V (1 เฟส)</option>
+            <option value="380">380V (3 เฟส)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Power Factor รวมระบบ</label>
+          <input type="number" id="l-pf" placeholder="0.85" min="0.1" max="1" step="0.01" value="0.85">
+        </div>
+        <div class="form-group">
+          <label>Diversity Factor (DF ระบบ)</label>
+          <input type="number" id="l-divf" placeholder="0.80" min="0.1" max="1" step="0.01" value="0.80">
+          <span class="unit-hint">ค่าทั่วไป: 0.7–0.9</span>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-calc" onclick="calcLoad()">⚡ คำนวณ Load ทั้งหมด</button>
+        <button class="btn-reset" onclick="resetForm('load')">↺ รีเซ็ต</button>
+      </div>
+    </div>
+
+    <div id="load-result" class="hidden">
+      <div class="card">
+        <div class="card-title"><div class="icon icon-green">📋</div>สรุปผล Load Calculation</div>
+        <div id="load-result-content"></div>
+      </div>
+    </div>
+
+    <!-- Demand Factor Reference -->
+    <div class="card">
+      <div class="card-title"><div class="icon icon-yellow">📖</div>Demand Factor มาตรฐาน 2022-2564</div>
+      <table class="ref-table">
+        <thead>
+          <tr><th>ประเภทโหลด</th><th>Demand Factor</th><th>อ้างอิง</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>แสงสว่าง (3,500W แรก)</td><td>100%</td><td>ข้อ 2.09</td></tr>
+          <tr><td>แสงสว่าง (3,501–120,000W)</td><td>35%</td><td>ข้อ 2.09</td></tr>
+          <tr><td>แสงสว่าง (เกิน 120,000W)</td><td>25%</td><td>ข้อ 2.09</td></tr>
+          <tr><td>เครื่องใช้ไฟฟ้าทั่วไป (1–3 เครื่อง)</td><td>100%</td><td>ข้อ 2.09</td></tr>
+          <tr><td>เครื่องใช้ไฟฟ้าทั่วไป (4+ เครื่อง)</td><td>75%</td><td>ข้อ 2.09</td></tr>
+          <tr><td>มอเตอร์ (Continuous Load)</td><td>125%</td><td>ข้อ 4.01</td></tr>
+          <tr><td>เครื่องปรับอากาศ</td><td>100%</td><td>ข้อ 2.09</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===================== DATA TABLES =====================
+
+// Wire Ampacity Table (PVC 60°C, XLPE 90°C) — In Conduit / Cable Tray
+// [size_mm2, PVC_conduit, XLPE_conduit, PVC_tray, XLPE_tray, PVC_air, XLPE_air]
+const WIRE_TABLE = [
+  [1.5,   15,  19,  17,  22,  20,  26],
+  [2.5,   20,  26,  23,  30,  26,  34],
+  [4,     27,  35,  30,  40,  34,  44],
+  [6,     35,  45,  40,  52,  44,  58],
+  [10,    49,  63,  55,  73,  61,  80],
+  [16,    66,  85,  74,  99,  82, 107],
+  [25,    87, 112,  98, 130, 108, 141],
+  [35,   105, 135, 118, 157, 131, 170],
+  [50,   125, 161, 141, 187, 157, 202],
+  [70,   158, 203, 178, 236, 198, 255],
+  [95,   190, 244, 215, 283, 238, 305],
+  [120,  220, 282, 247, 326, 276, 352],
+  [150,  252, 324, 285, 376, 318, 405],
+  [185,  289, 370, 327, 431, 363, 464],
+  [240,  345, 440, 389, 513, 432, 552],
+  [300,  396, 506, 447, 590, 496, 634],
+];
+
+// Resistance & Reactance (Ω/km at 50Hz, 90°C) — Copper conductor
+// [size_mm2, R_Cu_90, R_Al_90, X_trefoil]
+const CONDUCTOR_DATA = {
+  1.5:  { R_Cu: 14.48, R_Al: 24.00, X: 0.115 },
+  2.5:  { R_Cu: 8.71,  R_Al: 14.50, X: 0.110 },
+  4:    { R_Cu: 5.45,  R_Al: 9.06,  X: 0.107 },
+  6:    { R_Cu: 3.63,  R_Al: 6.04,  X: 0.104 },
+  10:   { R_Cu: 2.18,  R_Al: 3.62,  X: 0.101 },
+  16:   { R_Cu: 1.36,  R_Al: 2.27,  X: 0.098 },
+  25:   { R_Cu: 0.863, R_Al: 1.44,  X: 0.095 },
+  35:   { R_Cu: 0.627, R_Al: 1.04,  X: 0.093 },
+  50:   { R_Cu: 0.469, R_Al: 0.778, X: 0.090 },
+  70:   { R_Cu: 0.328, R_Al: 0.546, X: 0.087 },
+  95:   { R_Cu: 0.236, R_Al: 0.393, X: 0.084 },
+  120:  { R_Cu: 0.188, R_Al: 0.313, X: 0.082 },
+  150:  { R_Cu: 0.153, R_Al: 0.255, X: 0.080 },
+  185:  { R_Cu: 0.123, R_Al: 0.205, X: 0.079 },
+  240:  { R_Cu: 0.0943,R_Al: 0.157, X: 0.077 },
+  300:  { R_Cu: 0.0775,R_Al: 0.129, X: 0.075 },
+};
+
+// Standard CB sizes
+const CB_SIZES = [6,10,16,20,25,32,40,50,63,80,100,125,160,200,250,315,400,500,630,800,1000,1250,1600,2000];
+
+// PVC ampacity in conduit (as reference for CB check)
+const AMP_PVC_CONDUIT = {};
+const AMP_XLPE_CONDUIT = {};
+WIRE_TABLE.forEach(r => {
+  AMP_PVC_CONDUIT[r[0]] = r[1];
+  AMP_XLPE_CONDUIT[r[0]] = r[2];
+});
+
+// ===================== POPULATE REF TABLE =====================
+function populateWireTable() {
+  const tbody = document.getElementById('wire-table-body');
+  tbody.innerHTML = WIRE_TABLE.map(r =>
+    `<tr><td>${r[0]} mm²</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`
+  ).join('');
+}
+populateWireTable();
+
+// ===================== TAB SWITCHING =====================
+function switchTab(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ===================== RESET =====================
+function resetForm(type) {
+  const selectors = {
+    wire: ['#w-current'],
+    breaker: ['#b-current'],
+    vdrop: ['#v-current','#v-length'],
+    load: []
+  };
+  if (selectors[type]) {
+    selectors[type].forEach(s => { const el = document.querySelector(s); if(el) el.value = ''; });
+  }
+  const r = document.getElementById(type + '-result') || document.getElementById(type === 'vdrop' ? 'vdrop-result' : type + '-result');
+  if(r) r.classList.add('hidden');
+}
+
+// ===================== WIRE SIZING =====================
+function calcWire() {
+  const I_load = parseFloat(document.getElementById('w-current').value);
+  const ins = document.getElementById('w-insulation').value;
+  const install = document.getElementById('w-install').value;
+  const bundleFactor = parseFloat(document.getElementById('w-bundle').value);
+  const tempFactor = parseFloat(document.getElementById('w-temp').value);
+  const circuitFactor = parseFloat(document.getElementById('w-circuit').value);
+
+  if (isNaN(I_load) || I_load <= 0) {
+    alert('กรุณาใส่กระแสโหลดที่ถูกต้อง'); return;
+  }
+
+  // Design current after correction
+  const I_design = I_load * circuitFactor;
+  // Required ampacity (before derating)
+  const I_required = I_design / (bundleFactor * tempFactor);
+
+  // Find wire size
+  let selected = null;
+  for (let row of WIRE_TABLE) {
+    let ampacity;
+    if (install === 'conduit') ampacity = ins === 'PVC' ? row[1] : row[2];
+    else if (install === 'tray') ampacity = ins === 'PVC' ? row[3] : row[4];
+    else ampacity = ins === 'PVC' ? row[5] : row[6];
+
+    const adjusted = ampacity * bundleFactor * tempFactor;
+    if (adjusted >= I_design) {
+      selected = { size: row[0], baseAmp: ampacity, adjustedAmp: adjusted };
+      break;
+    }
+  }
+
+  const installLabel = { conduit: 'ร้อยในท่อ', tray: 'รางเคเบิล', air: 'ในอากาศ' };
+
+  let html = `
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="r-label">กระแสโหลดเดิม</div>
+        <div class="r-value">${I_load.toFixed(1)}</div>
+        <div class="r-unit">A</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">กระแสออกแบบ (×${circuitFactor})</div>
+        <div class="r-value">${I_design.toFixed(1)}</div>
+        <div class="r-unit">A</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">กระแสที่ต้องการหลังปรับ</div>
+        <div class="r-value">${I_required.toFixed(1)}</div>
+        <div class="r-unit">A (before derating)</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">Bundle Factor × Temp Factor</div>
+        <div class="r-value">${(bundleFactor * tempFactor).toFixed(3)}</div>
+        <div class="r-unit">correction factor</div>
+      </div>
+    </div>
+  `;
+
+  if (selected) {
+    const utilization = (I_design / selected.adjustedAmp * 100).toFixed(1);
+    const utilClass = utilization > 90 ? 'warn' : 'highlight';
+    html += `
+      <div class="section-divider"></div>
+      <div class="result-grid">
+        <div class="result-item highlight">
+          <div class="r-label">✅ ขนาดสายที่แนะนำ</div>
+          <div class="r-value">${selected.size}</div>
+          <div class="r-unit">mm² ${ins} — ${installLabel[install]}</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">พิกัดกระแส (Base)</div>
+          <div class="r-value">${selected.baseAmp}</div>
+          <div class="r-unit">A (ก่อนปรับ)</div>
+        </div>
+        <div class="result-item">
+          <div class="r-label">พิกัดกระแสหลังปรับ</div>
+          <div class="r-value">${selected.adjustedAmp.toFixed(1)}</div>
+          <div class="r-unit">A (หลัง Derating)</div>
+        </div>
+        <div class="result-item ${utilClass}">
+          <div class="r-label">% การใช้งาน</div>
+          <div class="r-value">${utilization}%</div>
+          <div class="r-unit">${utilization > 90 ? '⚠️ ใกล้เต็มพิกัด' : '✅ เหมาะสม'}</div>
+        </div>
+      </div>
+      <span class="status-badge status-ok">✅ ผ่านมาตรฐาน 2022-2564</span>
+    `;
+  } else {
+    html += `<div class="mt-16"><span class="status-badge status-fail">❌ กระแสสูงเกิน ต้องออกแบบใหม่ (ขนาดสายไม่พอในตาราง)</span></div>`;
+  }
+
+  html += `<p class="note-text">
+    <strong>สูตร:</strong> I_adjusted = I_base × CF_bundle × CF_temp ≥ I_design<br>
+    Bundle CF = ${bundleFactor} | Temp CF = ${tempFactor} | Circuit Factor = ×${circuitFactor}<br>
+    อ้างอิง: มาตรฐาน 2022-2564 ตาราง 4, ข้อ 3.02
+  </p>`;
+
+  document.getElementById('wire-result-content').innerHTML = html;
+  document.getElementById('wire-result').classList.remove('hidden');
+}
+
+// ===================== CIRCUIT BREAKER =====================
+function calcBreaker() {
+  const I_load = parseFloat(document.getElementById('b-current').value);
+  const loadtype = document.getElementById('b-loadtype').value;
+  const voltage = document.getElementById('b-voltage').value;
+  const wireSize = document.getElementById('b-wiresize').value;
+  const ins = document.getElementById('b-ins').value;
+  const ic = document.getElementById('b-ic').value;
+
+  if (isNaN(I_load) || I_load <= 0) {
+    alert('กรุณาใส่กระแสโหลดที่ถูกต้อง'); return;
+  }
+
+  const factor = loadtype === 'motor' || loadtype === 'heating' ? 1.25 : 1.0;
+  const I_design = I_load * factor;
+
+  // Find next standard CB size
+  let cbSize = CB_SIZES.find(s => s >= I_design);
+  if (!cbSize) cbSize = '> 2000A (ต้องใช้ ACB)';
+
+  // Check against wire ampacity
+  let wireAmp = null;
+  let wireCheck = null;
+  if (wireSize) {
+    wireAmp = ins === 'PVC' ? AMP_PVC_CONDUIT[parseFloat(wireSize)] : AMP_XLPE_CONDUIT[parseFloat(wireSize)];
+    if (wireAmp) {
+      wireCheck = typeof cbSize === 'number' ? cbSize <= wireAmp : false;
+    }
+  }
+
+  let html = `
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="r-label">กระแสโหลด</div>
+        <div class="r-value">${I_load.toFixed(1)}</div>
+        <div class="r-unit">A</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">กระแสออกแบบ (×${factor})</div>
+        <div class="r-value">${I_design.toFixed(1)}</div>
+        <div class="r-unit">A</div>
+      </div>
+      <div class="result-item highlight">
+        <div class="r-label">✅ ขนาด CB ที่แนะนำ</div>
+        <div class="r-value">${cbSize}</div>
+        <div class="r-unit">A — Breaking ${ic} kA</div>
+      </div>
+      ${wireAmp ? `
+      <div class="result-item ${wireCheck ? 'highlight' : 'danger'}">
+        <div class="r-label">พิกัดสาย ${wireSize} mm² ${ins}</div>
+        <div class="r-value">${wireAmp}</div>
+        <div class="r-unit">A — ${wireCheck ? '✅ CB ≤ สาย OK' : '❌ CB > สาย ผิด!'}</div>
+      </div>` : ''}
+    </div>
+  `;
+
+  if (wireAmp && !wireCheck) {
+    html += `<span class="status-badge status-fail">❌ ขนาด CB (${cbSize}A) มากกว่าพิกัดสาย (${wireAmp}A) ไม่ผ่าน!</span>`;
+  } else if (wireAmp) {
+    html += `<span class="status-badge status-ok">✅ CB และสายไฟผ่านมาตรฐาน</span>`;
+  } else {
+    html += `<span class="status-badge status-ok">✅ ขนาด CB ผ่านมาตรฐาน</span>`;
+  }
+
+  html += `<p class="note-text">
+    หลักการ: I_load × ${factor} ≤ I_CB ≤ I_wire (พิกัดสาย)<br>
+    ข้อกำหนด มาตรฐาน 2022-2564 ข้อ 3.03: CB ต้องไม่เกินพิกัดกระแสของสาย<br>
+    Breaking Capacity ที่เลือก: ${ic} kA (ต้องไม่น้อยกว่ากระแสลัดวงจร ณ จุดนั้น)
+  </p>`;
+
+  document.getElementById('breaker-result-content').innerHTML = html;
+  document.getElementById('breaker-result').classList.remove('hidden');
+}
+
+// ===================== VOLTAGE DROP =====================
+function calcVDrop() {
+  const I = parseFloat(document.getElementById('v-current').value);
+  const L = parseFloat(document.getElementById('v-length').value);
+  const sizeStr = document.getElementById('v-size').value;
+  const V_system = parseFloat(document.getElementById('v-volt').value);
+  const pf = parseFloat(document.getElementById('v-pf').value);
+  const conductor = document.getElementById('v-conductor').value;
+  const size = parseFloat(sizeStr);
+
+  if (isNaN(I) || isNaN(L) || I <= 0 || L <= 0) {
+    alert('กรุณาใส่กระแสและระยะทางที่ถูกต้อง'); return;
+  }
+
+  const cdata = CONDUCTOR_DATA[size];
+  if (!cdata) { alert('ไม่พบข้อมูลสาย'); return; }
+
+  const R_per_km = conductor === 'Cu' ? cdata.R_Cu : cdata.R_Al;
+  const X_per_km = cdata.X;
+  const sinpf = Math.sqrt(1 - pf * pf);
+
+  // VD calculation
+  let VD_volt, VD_pct;
+  if (V_system === 380) {
+    // 3-phase
+    VD_volt = Math.sqrt(3) * I * (L / 1000) * (R_per_km * pf + X_per_km * sinpf);
+    VD_pct = (VD_volt / V_system) * 100;
+  } else {
+    // 1-phase
+    VD_volt = 2 * I * (L / 1000) * (R_per_km * pf + X_per_km * sinpf);
+    VD_pct = (VD_volt / V_system) * 100;
+  }
+
+  const V_receiving = V_system - VD_volt;
+  const limit = 3.0;
+  const passed = VD_pct <= limit;
+
+  // Find minimum wire size for VD ≤ 3%
+  let minSize = null;
+  for (let [sz, d] of Object.entries(CONDUCTOR_DATA)) {
+    sz = parseFloat(sz);
+    const R = conductor === 'Cu' ? d.R_Cu : d.R_Al;
+    const X = d.X;
+    let vd;
+    if (V_system === 380) {
+      vd = (Math.sqrt(3) * I * (L/1000) * (R * pf + X * sinpf) / V_system) * 100;
+    } else {
+      vd = (2 * I * (L/1000) * (R * pf + X * sinpf) / V_system) * 100;
+    }
+    if (vd <= limit) { minSize = sz; break; }
+  }
+
+  let html = `
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="r-label">แรงดันตก (Volt)</div>
+        <div class="r-value">${VD_volt.toFixed(2)}</div>
+        <div class="r-unit">V</div>
+      </div>
+      <div class="result-item ${passed ? 'highlight' : 'danger'}">
+        <div class="r-label">แรงดันตก (%)</div>
+        <div class="r-value">${VD_pct.toFixed(2)}%</div>
+        <div class="r-unit">${passed ? '✅ ≤ 3% OK' : '❌ > 3% เกินกำหนด!'}</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">แรงดันที่ปลายทาง</div>
+        <div class="r-value">${V_receiving.toFixed(1)}</div>
+        <div class="r-unit">V</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">R สาย (Ω/km, 90°C)</div>
+        <div class="r-value">${R_per_km}</div>
+        <div class="r-unit">Ω/km (${conductor})</div>
+      </div>
+    </div>
+    <span class="status-badge ${passed ? 'status-ok' : 'status-fail'}">
+      ${passed ? '✅ ผ่าน VD ≤ 3% ตามมาตรฐาน' : '❌ ไม่ผ่าน — แนะนำเพิ่มขนาดสาย'}
+    </span>
+  `;
+
+  if (!passed && minSize) {
+    html += `
+      <div class="result-box mt-16">
+        <div class="result-title">💡 แนะนำ — ขนาดสายขั้นต่ำที่ VD ≤ 3%</div>
+        <div class="result-item highlight" style="display:inline-block;min-width:200px;">
+          <div class="r-label">ขนาดสายที่แนะนำ</div>
+          <div class="r-value">${minSize}</div>
+          <div class="r-unit">mm² ${conductor}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  html += `<p class="note-text">
+    สูตร: VD = ${V_system === 380 ? '√3' : '2'} × ${I}A × ${(L/1000).toFixed(3)}km × (${R_per_km}×${pf} + ${X_per_km}×${sinpf.toFixed(4)}) = ${VD_volt.toFixed(3)}V<br>
+    %VD = ${VD_volt.toFixed(3)} / ${V_system} × 100 = ${VD_pct.toFixed(2)}%<br>
+    อ้างอิง: มาตรฐาน 2022-2564 ข้อ 2.06 | ค่า R/X จากตาราง IEC 60228
+  </p>`;
+
+  document.getElementById('vdrop-result-content').innerHTML = html;
+  document.getElementById('vdrop-result').classList.remove('hidden');
+}
+
+// ===================== LOAD CALCULATION =====================
+let loadItemCount = 1;
+
+// Listen for DF dropdown changes
+document.addEventListener('change', function(e) {
+  if (e.target.classList.contains('load-df')) {
+    const custom = e.target.closest('.load-item').querySelector('.load-df-custom');
+    if (e.target.value === 'custom') {
+      custom.disabled = false;
+      custom.focus();
+    } else {
+      custom.disabled = true;
+      custom.value = '';
+    }
+  }
+});
+
+function addLoadItem() {
+  const idx = loadItemCount++;
+  const div = document.createElement('div');
+  div.className = 'load-item';
+  div.id = 'item-' + idx;
+  div.innerHTML = `
+    <div class="section-divider"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <span style="font-weight:600;color:var(--accent);font-size:0.85rem;">โหลดที่ ${idx+1}</span>
+      <button onclick="removeItem(${idx})" style="background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.2);border-radius:6px;padding:2px 8px;color:var(--error);font-size:0.78rem;cursor:pointer;">ลบ</button>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>ชื่อโหลด</label>
+        <input type="text" placeholder="เช่น เครื่องปรับอากาศ" class="load-name">
+      </div>
+      <div class="form-group">
+        <label>กำลังไฟ (W)</label>
+        <input type="number" placeholder="เช่น 2500" min="0" class="load-watts">
+      </div>
+      <div class="form-group">
+        <label>Demand Factor (%)</label>
+        <select class="load-df">
+          <option value="1.00">100% — มอเตอร์ขนาดใหญ่สุด</option>
+          <option value="1.25">125% — Continuous (มอเตอร์)</option>
+          <option value="0.50">50% — แสงสว่างพาณิชย์</option>
+          <option value="0.35">35% — โหลดที่ 10,001–20,000W</option>
+          <option value="0.25">25% — โหลดส่วนเกิน 20,000W</option>
+          <option value="0.80">80% — โหลดทั่วไป</option>
+          <option value="0.60">60% — โหลดสำรอง</option>
+          <option value="custom">กำหนดเอง</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>กำหนด DF เอง (%)</label>
+        <input type="number" placeholder="เช่น 75" min="0" max="125" class="load-df-custom" disabled>
+      </div>
+      <div class="form-group">
+        <label>Power Factor</label>
+        <input type="number" placeholder="0.90" min="0.1" max="1" step="0.01" value="0.90" class="load-pf">
+      </div>
+      <div class="form-group">
+        <label>จำนวน (pcs)</label>
+        <input type="number" placeholder="1" min="1" value="1" class="load-qty">
+      </div>
+    </div>
+  `;
+  document.getElementById('load-items').appendChild(div);
+}
+
+function removeItem(idx) {
+  const el = document.getElementById('item-' + idx);
+  if (el) el.remove();
+}
+
+function calcLoad() {
+  const items = document.querySelectorAll('.load-item');
+  const voltSystem = parseFloat(document.getElementById('l-volt').value);
+  const sysPF = parseFloat(document.getElementById('l-pf').value);
+  const divFactor = parseFloat(document.getElementById('l-divf').value);
+
+  if (items.length === 0) { alert('กรุณาเพิ่มโหลด'); return; }
+
+  let rows = [];
+  let totalConnected = 0, totalDemand = 0;
+
+  for (let item of items) {
+    const name = item.querySelector('.load-name').value || 'ไม่ระบุ';
+    const watts = parseFloat(item.querySelector('.load-watts').value);
+    const dfSel = item.querySelector('.load-df').value;
+    const dfCustom = parseFloat(item.querySelector('.load-df-custom').value);
+    const pf = parseFloat(item.querySelector('.load-pf').value) || 0.9;
+    const qty = parseInt(item.querySelector('.load-qty').value) || 1;
+
+    if (isNaN(watts) || watts <= 0) continue;
+
+    const df = dfSel === 'custom' ? (dfCustom / 100) : parseFloat(dfSel);
+    const connected = watts * qty;
+    const demand = connected * df;
+
+    totalConnected += connected;
+    totalDemand += demand;
+
+    rows.push({ name, watts, qty, connected, df, demand, pf });
+  }
+
+  if (rows.length === 0) { alert('กรุณาใส่ข้อมูลโหลดอย่างน้อย 1 รายการ'); return; }
+
+  const demandAfterDiv = totalDemand * divFactor;
+  const kVA = demandAfterDiv / (sysPF * 1000);
+
+  let I_system;
+  if (voltSystem === 380) {
+    I_system = (demandAfterDiv) / (Math.sqrt(3) * voltSystem * sysPF);
+  } else {
+    I_system = demandAfterDiv / (voltSystem * sysPF);
+  }
+
+  const I_design = I_system * 1.25; // 125% for main breaker sizing
+
+  let tableRows = rows.map((r,i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${r.name}</td>
+      <td>${r.watts.toLocaleString()}</td>
+      <td>${r.qty}</td>
+      <td>${r.connected.toLocaleString()}</td>
+      <td>${(r.df * 100).toFixed(0)}%</td>
+      <td>${r.demand.toLocaleString()}</td>
+      <td>${r.pf}</td>
+    </tr>
+  `).join('');
+
+  let html = `
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>#</th><th>ชื่อโหลด</th><th>W/ชิ้น</th><th>จำนวน</th>
+          <th>Connected (W)</th><th>DF</th><th>Demand (W)</th><th>PF</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+    </table>
+
+    <div class="section-divider"></div>
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="r-label">โหลดรวม (Connected)</div>
+        <div class="r-value">${totalConnected.toLocaleString()}</div>
+        <div class="r-unit">W (${(totalConnected/1000).toFixed(2)} kW)</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">Demand Load (ก่อน Diversity)</div>
+        <div class="r-value">${totalDemand.toLocaleString()}</div>
+        <div class="r-unit">W</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">Demand Load (หลัง Diversity ${divFactor})</div>
+        <div class="r-value">${demandAfterDiv.toLocaleString()}</div>
+        <div class="r-unit">W (${(demandAfterDiv/1000).toFixed(2)} kW)</div>
+      </div>
+      <div class="result-item highlight">
+        <div class="r-label">โหลดรวม (kVA)</div>
+        <div class="r-value">${kVA.toFixed(2)}</div>
+        <div class="r-unit">kVA (PF=${sysPF})</div>
+      </div>
+      <div class="result-item highlight">
+        <div class="r-label">กระแสระบบ</div>
+        <div class="r-value">${I_system.toFixed(1)}</div>
+        <div class="r-unit">A (${voltSystem}V ${voltSystem===380?'3เฟส':'1เฟส'})</div>
+      </div>
+      <div class="result-item">
+        <div class="r-label">กระแสออกแบบ Main (×1.25)</div>
+        <div class="r-value">${I_design.toFixed(1)}</div>
+        <div class="r-unit">A (สำหรับ Main CB)</div>
+      </div>
+    </div>
+
+    <span class="status-badge status-ok">✅ คำนวณครบถ้วน ตามมาตรฐาน 2022-2564</span>
+
+    <p class="note-text">
+      สูตร: I = P_demand / (√3 × V × PF) สำหรับ 3 เฟส | I = P_demand / (V × PF) สำหรับ 1 เฟส<br>
+      Diversity Factor = ${divFactor} (ค่าการใช้งานพร้อมกันของโหลดในระบบ)<br>
+      Main CB ต้องรองรับอย่างน้อย ${I_design.toFixed(1)}A (กระแสออกแบบ × 1.25)<br>
+      อ้างอิง: มาตรฐาน 2022-2564 ข้อ 2.09, ข้อ 3.03
+    </p>
+  `;
+
+  document.getElementById('load-result-content').innerHTML = html;
+  document.getElementById('load-result').classList.remove('hidden');
+  document.getElementById('load-result').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
